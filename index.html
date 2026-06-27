@@ -604,12 +604,12 @@ form.addEventListener('submit', async function(e) {
       form.style.display = 'none';
       const successBox = document.getElementById('formSuccess');
       successBox.style.display = 'block';
-      // Reset back to form after 2 seconds
+      // Reset back to form after 55 minutes
       setTimeout(() => {
         successBox.style.display = 'none';
         form.reset();
         form.style.display = 'flex';
-      }, 2000);
+      }, 55 * 60 * 1000);
     } else {
       alert('Something went wrong. Please email us directly at sriram@orbitanalytics.org');
     }
