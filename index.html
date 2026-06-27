@@ -42,8 +42,8 @@
     border-bottom: 1px solid rgba(74,155,155,0.15);
   }
   .nav-logo { display: flex; align-items: center; gap: 0.8rem; text-decoration: none; }
-  .nav-logo img { height: 36px; width: auto; }
-  .nav-logo-text { font-size: 1.3rem; font-weight: 700; color: var(--white); letter-spacing: 0.08em; }
+  .nav-logo img { height: 52px; width: auto; }
+  .nav-logo-text { font-size: 1.6rem; font-weight: 700; color: var(--white); letter-spacing: 0.08em; }
   .nav-logo-text span { color: var(--teal); }
   nav ul { display: flex; gap: 2.5rem; list-style: none; }
   nav ul a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
@@ -70,9 +70,27 @@
                 radial-gradient(ellipse 40% 40% at 20% 80%, rgba(217,79,43,0.08) 0%, transparent 60%);
   }
   .hero-court {
-    position: absolute; right: -80px; top: 50%; transform: translateY(-50%);
-    opacity: 0.06; pointer-events: none;
+    position: absolute; right: -40px; top: 50%; transform: translateY(-50%);
+    opacity: 0.22; pointer-events: none;
   }
+  /* Coming Soon badge */
+  .coming-soon-badge {
+    position: absolute; right: 60px; top: 38%;
+    background: rgba(217,79,43,0.15);
+    border: 1.5px solid rgba(217,79,43,0.5);
+    color: var(--coral-light);
+    font-family: var(--font-mono); font-size: 0.75rem;
+    font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+    padding: 0.5rem 1.1rem; border-radius: 6px;
+    backdrop-filter: blur(6px);
+    z-index: 3;
+    animation: floatBadge 3s ease-in-out infinite;
+  }
+  @keyframes floatBadge {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  @media (max-width: 900px) { .coming-soon-badge { display: none; } }
   .hero-content { position: relative; z-index: 2; max-width: 680px; }
   .hero-eyebrow {
     display: inline-flex; align-items: center; gap: 0.6rem;
@@ -313,14 +331,25 @@
 <!-- HERO -->
 <section class="hero">
   <div class="hero-bg"></div>
+  <!-- Coming Soon badge -->
+  <div class="coming-soon-badge">🚀 Coming Soon</div>
+
   <!-- Court wireframe background -->
   <svg class="hero-court court-svg" width="600" height="700" viewBox="0 0 600 700" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="60" y="40" width="480" height="620" stroke="#4A9B9B" stroke-width="3"/>
-    <line x1="60" y1="350" x2="540" y2="350" stroke="#4A9B9B" stroke-width="2"/>
-    <line x1="300" y1="40" x2="300" y2="660" stroke="#4A9B9B" stroke-width="1.5"/>
-    <rect x="150" y="40" width="300" height="620" stroke="#4A9B9B" stroke-width="1.5"/>
-    <line x1="60" y1="190" x2="540" y2="190" stroke="#4A9B9B" stroke-width="1"/>
-    <line x1="60" y1="510" x2="540" y2="510" stroke="#4A9B9B" stroke-width="1"/>
+    <rect x="60" y="40" width="480" height="620" stroke="#4A9B9B" stroke-width="4"/>
+    <line x1="60" y1="350" x2="540" y2="350" stroke="#4A9B9B" stroke-width="3"/>
+    <line x1="300" y1="40" x2="300" y2="660" stroke="#4A9B9B" stroke-width="2.5"/>
+    <rect x="150" y="40" width="300" height="620" stroke="#4A9B9B" stroke-width="2.5"/>
+    <line x1="60" y1="190" x2="540" y2="190" stroke="#4A9B9B" stroke-width="2"/>
+    <line x1="60" y1="510" x2="540" y2="510" stroke="#4A9B9B" stroke-width="2"/>
+    <!-- shuttle trajectory lines -->
+    <path d="M 150 600 Q 300 150 450 580" stroke="#D94F2B" stroke-width="2" stroke-dasharray="8,5" fill="none" opacity="0.6"/>
+    <path d="M 200 580 Q 320 200 480 560" stroke="#D94F2B" stroke-width="1.5" stroke-dasharray="6,4" fill="none" opacity="0.4"/>
+    <!-- player dots -->
+    <circle cx="240" cy="560" r="10" fill="#4A9B9B" opacity="0.8"/>
+    <circle cx="360" cy="560" r="10" fill="#4A9B9B" opacity="0.8"/>
+    <circle cx="280" cy="170" r="10" fill="#D94F2B" opacity="0.8"/>
+    <circle cx="340" cy="170" r="10" fill="#D94F2B" opacity="0.8"/>
   </svg>
   <div class="hero-content">
     <div class="hero-eyebrow"><span class="hero-eyebrow-dot"></span>Now in private beta · Built in France 🇫🇷</div>
@@ -332,16 +361,16 @@
     </div>
     <div class="hero-stats">
       <div>
-        <div class="hero-stat-val">Real-time</div>
-        <div class="hero-stat-lbl">Player & shuttle tracking</div>
-      </div>
-      <div>
         <div class="hero-stat-val">6+</div>
         <div class="hero-stat-lbl">Analytics stages</div>
       </div>
       <div>
         <div class="hero-stat-val">AI-first</div>
         <div class="hero-stat-lbl">Computer vision pipeline</div>
+      </div>
+      <div>
+        <div class="hero-stat-val">EU 🇫🇷</div>
+        <div class="hero-stat-lbl">Built in France</div>
       </div>
     </div>
   </div>
@@ -481,7 +510,7 @@
     <h2>Be the first to<br>play with ORBIT</h2>
     <p>We're opening early access to clubs, coaches, and players who want to shape what ORBIT becomes. No cost. Just great badminton analytics.</p>
 
-    <form class="beta-form" id="betaForm">
+    <form class="beta-form" id="betaForm" action="https://formspree.io/f/xqevqveq" method="POST">
       <div class="form-row">
         <div class="form-field">
           <label for="fname">First name</label>
@@ -558,31 +587,35 @@ const observer = new IntersectionObserver((entries) => {
 }, { threshold: 0.1 });
 reveals.forEach(el => observer.observe(el));
 
-// Form submission — sends via mailto fallback + shows success
-document.getElementById('betaForm').addEventListener('submit', function(e) {
+// Formspree AJAX submission
+const form = document.getElementById('betaForm');
+form.addEventListener('submit', async function(e) {
   e.preventDefault();
-  const fname = document.getElementById('fname').value;
-  const lname = document.getElementById('lname').value;
   const email = document.getElementById('email').value;
-  const role = document.getElementById('role').value;
-  const country = document.getElementById('country').value;
-  const message = document.getElementById('message').value;
-
-  const subject = encodeURIComponent('ORBIT Beta Access Request – ' + fname + ' ' + lname);
-  const body = encodeURIComponent(
-    'New Beta Access Request\n\n' +
-    'Name: ' + fname + ' ' + lname + '\n' +
-    'Email: ' + email + '\n' +
-    'Role: ' + role + '\n' +
-    'Country: ' + country + '\n\n' +
-    'Message:\n' + message
-  );
-
-  window.location.href = 'mailto:sriram@orbitanalytics.org?subject=' + subject + '&body=' + body;
-
-  document.getElementById('successEmail').textContent = email;
-  document.getElementById('betaForm').style.display = 'none';
-  document.getElementById('formSuccess').style.display = 'block';
+  const data = new FormData(form);
+  try {
+    const response = await fetch('https://formspree.io/f/xqevqveq', {
+      method: 'POST',
+      body: data,
+      headers: { 'Accept': 'application/json' }
+    });
+    if (response.ok) {
+      document.getElementById('successEmail').textContent = email;
+      form.style.display = 'none';
+      const successBox = document.getElementById('formSuccess');
+      successBox.style.display = 'block';
+      // Reset back to form after 2 seconds
+      setTimeout(() => {
+        successBox.style.display = 'none';
+        form.reset();
+        form.style.display = 'flex';
+      }, 2000);
+    } else {
+      alert('Something went wrong. Please email us directly at sriram@orbitanalytics.org');
+    }
+  } catch {
+    alert('Something went wrong. Please email us directly at sriram@orbitanalytics.org');
+  }
 });
 </script>
 </body>
