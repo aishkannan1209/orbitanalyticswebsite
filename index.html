@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ORBIT — AI Badminton Analytics</title>
+<meta name="description" content="AI computer vision analytics for badminton courts. Player tracking, shot analysis, and tactical intelligence for coaches and players.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --teal: #4A9B9B;
+    --teal-dark: #357070;
+    --teal-light: #6DBDBD;
+    --coral: #D94F2B;
+    --coral-light: #E8724F;
+    --charcoal: #1A1A2E;
+    --charcoal-mid: #2D2D44;
+    --white: #FFFFFF;
+    --off-white: #F5F5F0;
+    --grey: #8A8A9A;
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-mono: 'Space Mono', monospace;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-display);
+    background: var(--charcoal);
+    color: var(--white);
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.2rem 4rem;
+    background: rgba(26,26,46,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(74,155,155,0.15);
+  }
+  .nav-logo { display: flex; align-items: center; gap: 0.8rem; text-decoration: none; }
+  .nav-logo img { height: 36px; width: auto; }
+  .nav-logo-text { font-size: 1.3rem; font-weight: 700; color: var(--white); letter-spacing: 0.08em; }
+  .nav-logo-text span { color: var(--teal); }
+  nav ul { display: flex; gap: 2.5rem; list-style: none; }
+  nav ul a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
+  nav ul a:hover { color: var(--teal-light); }
+  .nav-cta {
+    background: var(--coral); color: var(--white);
+    padding: 0.55rem 1.4rem; border-radius: 6px;
+    font-weight: 600; font-size: 0.88rem; text-decoration: none;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .nav-cta:hover { background: var(--coral-light); transform: translateY(-1px); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex; align-items: center;
+    padding: 8rem 4rem 5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 60% at 80% 50%, rgba(74,155,155,0.12) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 40% at 20% 80%, rgba(217,79,43,0.08) 0%, transparent 60%);
+  }
+  .hero-court {
+    position: absolute; right: -80px; top: 50%; transform: translateY(-50%);
+    opacity: 0.06; pointer-events: none;
+  }
+  .hero-content { position: relative; z-index: 2; max-width: 680px; }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    background: rgba(74,155,155,0.12); border: 1px solid rgba(74,155,155,0.3);
+    padding: 0.35rem 1rem; border-radius: 50px;
+    font-size: 0.78rem; font-weight: 600; letter-spacing: 0.12em;
+    color: var(--teal-light); text-transform: uppercase; margin-bottom: 2rem;
+  }
+  .hero-eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--coral); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+  .hero h1 {
+    font-size: clamp(2.8rem, 5vw, 4.2rem);
+    font-weight: 700; line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+  }
+  .hero h1 em { font-style: normal; color: var(--teal-light); }
+  .hero h1 .accent { color: var(--coral); }
+  .hero-sub {
+    font-size: 1.15rem; color: rgba(255,255,255,0.65);
+    max-width: 520px; margin-bottom: 2.5rem; line-height: 1.7;
+  }
+  .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--coral); color: var(--white);
+    padding: 0.9rem 2rem; border-radius: 8px;
+    font-weight: 600; font-size: 1rem; text-decoration: none;
+    transition: all 0.2s; display: inline-block;
+    box-shadow: 0 4px 20px rgba(217,79,43,0.35);
+  }
+  .btn-primary:hover { background: var(--coral-light); transform: translateY(-2px); box-shadow: 0 6px 28px rgba(217,79,43,0.45); }
+  .btn-secondary {
+    background: transparent; color: var(--teal-light);
+    padding: 0.9rem 2rem; border-radius: 8px;
+    font-weight: 600; font-size: 1rem; text-decoration: none;
+    border: 1.5px solid rgba(74,155,155,0.4);
+    transition: all 0.2s; display: inline-block;
+  }
+  .btn-secondary:hover { border-color: var(--teal-light); background: rgba(74,155,155,0.08); }
+  .hero-stats {
+    display: flex; gap: 2.5rem; margin-top: 3.5rem;
+    padding-top: 2.5rem; border-top: 1px solid rgba(255,255,255,0.08);
+    flex-wrap: wrap;
+  }
+  .hero-stat-val { font-size: 2rem; font-weight: 700; color: var(--teal-light); font-family: var(--font-mono); }
+  .hero-stat-lbl { font-size: 0.8rem; color: rgba(255,255,255,0.45); margin-top: 0.2rem; }
+
+  /* ── PIPELINE ── */
+  .pipeline-section {
+    padding: 6rem 4rem;
+    background: var(--charcoal-mid);
+    position: relative;
+  }
+  .section-label {
+    font-family: var(--font-mono); font-size: 0.75rem;
+    color: var(--teal); letter-spacing: 0.2em; text-transform: uppercase;
+    margin-bottom: 0.8rem;
+  }
+  .section-title {
+    font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 700;
+    letter-spacing: -0.02em; margin-bottom: 1rem;
+  }
+  .section-sub { color: rgba(255,255,255,0.55); max-width: 560px; margin-bottom: 3.5rem; }
+  .pipeline-steps {
+    display: grid; grid-template-columns: repeat(5,1fr);
+    gap: 0; position: relative;
+  }
+  .pipeline-steps::before {
+    content: ''; position: absolute;
+    top: 40px; left: 10%; right: 10%; height: 2px;
+    background: linear-gradient(90deg, var(--teal), var(--coral));
+    z-index: 0;
+  }
+  .pipeline-step {
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center; padding: 0 1rem; position: relative; z-index: 1;
+  }
+  .step-icon {
+    width: 80px; height: 80px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1.2rem; font-size: 1.6rem;
+    border: 2px solid rgba(74,155,155,0.3);
+    background: var(--charcoal);
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .pipeline-step:hover .step-icon { transform: scale(1.08); border-color: var(--teal); }
+  .step-icon.coral-icon { border-color: rgba(217,79,43,0.3); }
+  .pipeline-step:hover .coral-icon { border-color: var(--coral); }
+  .step-num {
+    font-family: var(--font-mono); font-size: 0.7rem;
+    color: var(--teal); margin-bottom: 0.4rem; letter-spacing: 0.1em;
+  }
+  .step-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.4rem; }
+  .step-desc { font-size: 0.78rem; color: rgba(255,255,255,0.45); line-height: 1.5; }
+
+  /* ── FEATURES ── */
+  .features-section { padding: 6rem 4rem; }
+  .features-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; margin-top: 3rem; }
+  .feature-card {
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 16px; padding: 2rem;
+    transition: border-color 0.2s, background 0.2s, transform 0.2s;
+  }
+  .feature-card:hover { border-color: rgba(74,155,155,0.3); background: rgba(74,155,155,0.05); transform: translateY(-3px); }
+  .feature-icon { font-size: 2rem; margin-bottom: 1rem; }
+  .feature-title { font-size: 1.05rem; font-weight: 600; margin-bottom: 0.6rem; }
+  .feature-desc { font-size: 0.88rem; color: rgba(255,255,255,0.5); line-height: 1.6; }
+  .feature-tag {
+    display: inline-block; margin-top: 1rem;
+    background: rgba(74,155,155,0.1); color: var(--teal-light);
+    font-size: 0.72rem; font-family: var(--font-mono);
+    padding: 0.2rem 0.7rem; border-radius: 4px; letter-spacing: 0.08em;
+  }
+  .feature-tag.coral-tag { background: rgba(217,79,43,0.1); color: var(--coral-light); }
+
+  /* ── WHO IT'S FOR ── */
+  .audience-section {
+    padding: 6rem 4rem;
+    background: var(--charcoal-mid);
+  }
+  .audience-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 2rem; margin-top: 3rem; }
+  .audience-card {
+    border-radius: 16px; padding: 2.5rem 2rem;
+    background: linear-gradient(135deg, rgba(74,155,155,0.08), rgba(74,155,155,0.02));
+    border: 1px solid rgba(74,155,155,0.15);
+  }
+  .audience-card:nth-child(2) {
+    background: linear-gradient(135deg, rgba(217,79,43,0.08), rgba(217,79,43,0.02));
+    border-color: rgba(217,79,43,0.15);
+  }
+  .audience-emoji { font-size: 2.5rem; margin-bottom: 1rem; display: block; }
+  .audience-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.8rem; }
+  .audience-list { list-style: none; }
+  .audience-list li { font-size: 0.88rem; color: rgba(255,255,255,0.6); padding: 0.4rem 0; padding-left: 1.2rem; position: relative; }
+  .audience-list li::before { content: '→'; position: absolute; left: 0; color: var(--teal); font-size: 0.8rem; }
+  .audience-card:nth-child(2) .audience-list li::before { color: var(--coral); }
+
+  /* ── BETA FORM ── */
+  .beta-section {
+    padding: 7rem 4rem;
+    text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .beta-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 60% 80% at 50% 50%, rgba(74,155,155,0.1) 0%, transparent 70%);
+  }
+  .beta-content { position: relative; z-index: 2; max-width: 600px; margin: 0 auto; }
+  .beta-section h2 { font-size: clamp(2rem, 3.5vw, 3rem); font-weight: 700; margin-bottom: 1rem; }
+  .beta-section p { color: rgba(255,255,255,0.55); margin-bottom: 2.5rem; font-size: 1.05rem; }
+  .beta-form { display: flex; flex-direction: column; gap: 1rem; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .form-field {
+    display: flex; flex-direction: column; gap: 0.4rem; text-align: left;
+  }
+  .form-field label { font-size: 0.82rem; color: rgba(255,255,255,0.5); font-weight: 500; }
+  .form-field input, .form-field select, .form-field textarea {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px; padding: 0.85rem 1rem;
+    color: var(--white); font-family: var(--font-display); font-size: 0.95rem;
+    transition: border-color 0.2s, background 0.2s; outline: none; width: 100%;
+  }
+  .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+    border-color: var(--teal); background: rgba(74,155,155,0.07);
+  }
+  .form-field select option { background: var(--charcoal); }
+  .form-field textarea { resize: vertical; min-height: 90px; }
+  .form-submit {
+    background: var(--coral); color: var(--white); border: none;
+    padding: 1rem 2.5rem; border-radius: 8px; font-size: 1rem; font-weight: 600;
+    cursor: pointer; font-family: var(--font-display);
+    transition: all 0.2s; box-shadow: 0 4px 20px rgba(217,79,43,0.35);
+    margin-top: 0.5rem;
+  }
+  .form-submit:hover { background: var(--coral-light); transform: translateY(-2px); }
+  .form-note { font-size: 0.78rem; color: rgba(255,255,255,0.3); margin-top: 0.8rem; }
+  .form-success {
+    display: none; background: rgba(74,155,155,0.12); border: 1px solid rgba(74,155,155,0.3);
+    border-radius: 12px; padding: 2rem; text-align: center;
+  }
+  .form-success h3 { color: var(--teal-light); margin-bottom: 0.5rem; }
+  .form-success p { color: rgba(255,255,255,0.6); font-size: 0.9rem; }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 3rem 4rem;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+  }
+  .footer-logo { display: flex; align-items: center; gap: 0.7rem; }
+  .footer-logo img { height: 28px; }
+  .footer-logo-text { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.08em; }
+  .footer-logo-text span { color: var(--teal); }
+  .footer-links { display: flex; gap: 2rem; }
+  .footer-links a { color: rgba(255,255,255,0.4); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--teal-light); }
+  .footer-right { font-size: 0.8rem; color: rgba(255,255,255,0.25); }
+
+  /* ── COURT SVG BACKGROUND ── */
+  .court-svg { opacity: 0.04; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    nav { padding: 1rem 1.5rem; }
+    nav ul { display: none; }
+    .hero { padding: 7rem 1.5rem 4rem; }
+    .pipeline-section, .features-section, .audience-section, .beta-section { padding: 4rem 1.5rem; }
+    .pipeline-steps { grid-template-columns: 1fr 1fr; gap: 2rem; }
+    .pipeline-steps::before { display: none; }
+    .features-grid { grid-template-columns: 1fr; }
+    .audience-grid { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    footer { padding: 2rem 1.5rem; flex-direction: column; align-items: flex-start; }
+  }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .reveal.visible { opacity: 1; transform: none; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <img src="Logo.png" alt="ORBIT logo">
+    <span class="nav-logo-text">ORBIT<span>.</span></span>
+  </a>
+  <ul>
+    <li><a href="#how-it-works">How it works</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#who">Who it's for</a></li>
+    <li><a href="#beta">Beta</a></li>
+  </ul>
+  <a href="#beta" class="nav-cta">Request Beta Access</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <!-- Court wireframe background -->
+  <svg class="hero-court court-svg" width="600" height="700" viewBox="0 0 600 700" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="60" y="40" width="480" height="620" stroke="#4A9B9B" stroke-width="3"/>
+    <line x1="60" y1="350" x2="540" y2="350" stroke="#4A9B9B" stroke-width="2"/>
+    <line x1="300" y1="40" x2="300" y2="660" stroke="#4A9B9B" stroke-width="1.5"/>
+    <rect x="150" y="40" width="300" height="620" stroke="#4A9B9B" stroke-width="1.5"/>
+    <line x1="60" y1="190" x2="540" y2="190" stroke="#4A9B9B" stroke-width="1"/>
+    <line x1="60" y1="510" x2="540" y2="510" stroke="#4A9B9B" stroke-width="1"/>
+  </svg>
+  <div class="hero-content">
+    <div class="hero-eyebrow"><span class="hero-eyebrow-dot"></span>Now in private beta · Built in France 🇫🇷</div>
+    <h1>Every shuttle.<br><em>Every step.</em><br>Every <span class="accent">shot.</span></h1>
+    <p class="hero-sub">ORBIT uses computer vision and AI to turn your badminton match footage into tactical intelligence — player tracking, shot analysis, and court patterns in minutes.</p>
+    <div class="hero-actions">
+      <a href="#beta" class="btn-primary">Request Beta Access</a>
+      <a href="#how-it-works" class="btn-secondary">See how it works</a>
+    </div>
+    <div class="hero-stats">
+      <div>
+        <div class="hero-stat-val">Real-time</div>
+        <div class="hero-stat-lbl">Player & shuttle tracking</div>
+      </div>
+      <div>
+        <div class="hero-stat-val">6+</div>
+        <div class="hero-stat-lbl">Analytics stages</div>
+      </div>
+      <div>
+        <div class="hero-stat-val">AI-first</div>
+        <div class="hero-stat-lbl">Computer vision pipeline</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PIPELINE -->
+<section class="pipeline-section" id="how-it-works">
+  <div class="section-label">How it works</div>
+  <h2 class="section-title">From footage to intelligence<br>in minutes</h2>
+  <p class="section-sub">Upload any match video. ORBIT's AI pipeline does the rest — no manual tagging, no specialist hardware needed.</p>
+
+  <div class="pipeline-steps">
+    <div class="pipeline-step reveal">
+      <div class="step-icon">🎥</div>
+      <div class="step-num">01</div>
+      <div class="step-title">Upload Video</div>
+      <div class="step-desc">Any camera angle. Phone, tripod, or broadcast footage.</div>
+    </div>
+    <div class="pipeline-step reveal">
+      <div class="step-icon">🎯</div>
+      <div class="step-num">02</div>
+      <div class="step-title">Player Detection</div>
+      <div class="step-desc">YOLOv9 detects and ByteTrack follows every player frame by frame.</div>
+    </div>
+    <div class="pipeline-step reveal">
+      <div class="step-icon coral-icon">🏸</div>
+      <div class="step-num">03</div>
+      <div class="step-title">Shuttle Tracking</div>
+      <div class="step-desc">TrackNet AI traces the shuttle trajectory with parabolic interpolation.</div>
+    </div>
+    <div class="pipeline-step reveal">
+      <div class="step-icon">🦾</div>
+      <div class="step-num">04</div>
+      <div class="step-title">Pose & Shot Analysis</div>
+      <div class="step-desc">MediaPipe reads body pose. Backhand, forehand, smash — all classified.</div>
+    </div>
+    <div class="pipeline-step reveal">
+      <div class="step-icon coral-icon">📊</div>
+      <div class="step-num">05</div>
+      <div class="step-title">Tactical Report</div>
+      <div class="step-desc">Heatmaps, shot distributions, court patterns delivered instantly.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-section" id="features">
+  <div class="section-label">What ORBIT sees</div>
+  <h2 class="section-title">Analytics built for<br>the way badminton is played</h2>
+  <p class="section-sub">Six deep analytics stages that go far beyond basic stats — built by players, for players.</p>
+
+  <div class="features-grid">
+    <div class="feature-card reveal">
+      <div class="feature-icon">🗺️</div>
+      <div class="feature-title">Court Coverage Heatmap</div>
+      <div class="feature-desc">See exactly which zones each player dominates — and which they avoid. Identify coverage gaps in seconds.</div>
+      <span class="feature-tag">Stage 4d</span>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">🎯</div>
+      <div class="feature-title">Shot Selection Analysis</div>
+      <div class="feature-desc">Backhand vs forehand ratios, shot type breakdown per rally, and preferred attack angles for each player.</div>
+      <span class="feature-tag">Stage 4c</span>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">💥</div>
+      <div class="feature-title">Smash Zone Intelligence</div>
+      <div class="feature-desc">Map where every smash originates and lands. Understand your strongest attacking positions vs opponents' weak zones.</div>
+      <span class="feature-tag coral-tag">Stage 4d</span>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">🦾</div>
+      <div class="feature-title">Racket Contact & Pressure</div>
+      <div class="feature-desc">Detect exact racket-shuttle contact moments using pose estimation and pressure timing analysis.</div>
+      <span class="feature-tag">Stage 4b</span>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">🔁</div>
+      <div class="feature-title">Match Pattern Recognition</div>
+      <div class="feature-desc">Discover repeating tactical patterns across rallies — what sequences lead to winners or errors.</div>
+      <span class="feature-tag coral-tag">Stage 4d</span>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">🎬</div>
+      <div class="feature-title">Audio-Synced Video Export</div>
+      <div class="feature-desc">Export annotated highlight clips with overlays synced to real audio — ready to share with coaches or players.</div>
+      <span class="feature-tag">Stage 4c</span>
+    </div>
+  </div>
+</section>
+
+<!-- WHO IT'S FOR -->
+<section class="audience-section" id="who">
+  <div class="section-label">Who it's for</div>
+  <h2 class="section-title">Built for every level<br>of the game</h2>
+  <p class="section-sub">Whether you're coaching a national squad or tracking your own progress at a local club.</p>
+
+  <div class="audience-grid">
+    <div class="audience-card reveal">
+      <span class="audience-emoji">🏆</span>
+      <div class="audience-title">Coaches & Academies</div>
+      <ul class="audience-list">
+        <li>Analyse every player's movement patterns</li>
+        <li>Spot tactical weaknesses before the opponent does</li>
+        <li>Build data-driven training programmes</li>
+        <li>Share annotated reports with players instantly</li>
+      </ul>
+    </div>
+    <div class="audience-card reveal">
+      <span class="audience-emoji">🏸</span>
+      <div class="audience-title">Players</div>
+      <ul class="audience-list">
+        <li>Understand your own shot tendencies</li>
+        <li>Compare performance across tournaments</li>
+        <li>Scout opponents before key matches</li>
+        <li>Track your improvement over time</li>
+      </ul>
+    </div>
+    <div class="audience-card reveal">
+      <span class="audience-emoji">🏛️</span>
+      <div class="audience-title">Clubs & Federations</div>
+      <ul class="audience-list">
+        <li>Centralise analytics for your full squad</li>
+        <li>Affordable alternative to broadcast analytics</li>
+        <li>Works with standard club camera setups</li>
+        <li>Scalable from grassroots to elite level</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- BETA FORM -->
+<section class="beta-section" id="beta">
+  <div class="beta-bg"></div>
+  <div class="beta-content">
+    <div class="section-label" style="text-align:center;margin-bottom:0.8rem">Early access</div>
+    <h2>Be the first to<br>play with ORBIT</h2>
+    <p>We're opening early access to clubs, coaches, and players who want to shape what ORBIT becomes. No cost. Just great badminton analytics.</p>
+
+    <form class="beta-form" id="betaForm">
+      <div class="form-row">
+        <div class="form-field">
+          <label for="fname">First name</label>
+          <input type="text" id="fname" name="fname" placeholder="Sriram" required>
+        </div>
+        <div class="form-field">
+          <label for="lname">Last name</label>
+          <input type="text" id="lname" name="lname" placeholder="Kannan" required>
+        </div>
+      </div>
+      <div class="form-field">
+        <label for="email">Email address</label>
+        <input type="email" id="email" name="email" placeholder="you@example.com" required>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label for="role">I am a...</label>
+          <select id="role" name="role" required>
+            <option value="" disabled selected>Select your role</option>
+            <option>Player</option>
+            <option>Coach</option>
+            <option>Club Manager</option>
+            <option>National Federation</option>
+            <option>Sports Analyst</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="country">Country</label>
+          <input type="text" id="country" name="country" placeholder="France, India, UK...">
+        </div>
+      </div>
+      <div class="form-field">
+        <label for="message">What would you use ORBIT for? (optional)</label>
+        <textarea id="message" name="message" placeholder="e.g. Analysing our club's league matches, scouting opponents for my students..."></textarea>
+      </div>
+      <button type="submit" class="form-submit">Request Beta Access →</button>
+      <p class="form-note">We'll reply within 48 hours. No spam, ever.</p>
+    </form>
+
+    <div class="form-success" id="formSuccess">
+      <h3>🏸 You're on the list!</h3>
+      <p>Thanks for your interest in ORBIT. We'll be in touch at <strong id="successEmail"></strong> within 48 hours.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">
+    <img src="Logo.png" alt="ORBIT">
+    <span class="footer-logo-text">ORBIT<span>.</span></span>
+  </div>
+  <div class="footer-links">
+    <a href="#how-it-works">How it works</a>
+    <a href="#features">Features</a>
+    <a href="#beta">Beta access</a>
+    <a href="mailto:sriram@orbitanalytics.org">Contact</a>
+  </div>
+  <div class="footer-right">
+    © 2026 ORBIT Analytics · Built in France 🇫🇷 · <a href="mailto:sriram@orbitanalytics.org" style="color:rgba(255,255,255,0.25);text-decoration:none;">sriram@orbitanalytics.org</a>
+  </div>
+</footer>
+
+<script>
+// Scroll reveal
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => entry.target.classList.add('visible'), i * 80);
+    }
+  });
+}, { threshold: 0.1 });
+reveals.forEach(el => observer.observe(el));
+
+// Form submission — sends via mailto fallback + shows success
+document.getElementById('betaForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const fname = document.getElementById('fname').value;
+  const lname = document.getElementById('lname').value;
+  const email = document.getElementById('email').value;
+  const role = document.getElementById('role').value;
+  const country = document.getElementById('country').value;
+  const message = document.getElementById('message').value;
+
+  const subject = encodeURIComponent('ORBIT Beta Access Request – ' + fname + ' ' + lname);
+  const body = encodeURIComponent(
+    'New Beta Access Request\n\n' +
+    'Name: ' + fname + ' ' + lname + '\n' +
+    'Email: ' + email + '\n' +
+    'Role: ' + role + '\n' +
+    'Country: ' + country + '\n\n' +
+    'Message:\n' + message
+  );
+
+  window.location.href = 'mailto:sriram@orbitanalytics.org?subject=' + subject + '&body=' + body;
+
+  document.getElementById('successEmail').textContent = email;
+  document.getElementById('betaForm').style.display = 'none';
+  document.getElementById('formSuccess').style.display = 'block';
+});
+</script>
+</body>
+</html>
