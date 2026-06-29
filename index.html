@@ -181,8 +181,29 @@
 
   /* ── RESPONSIVE ── */
   @media (max-width: 900px) {
-    nav { padding: 1rem 1.5rem; }
+    nav {
+      padding: 0.8rem 1.2rem;
+      flex-wrap: nowrap;
+      gap: 0.5rem;
+    }
+    .nav-logo img { height: 38px; }
+    .nav-logo-text { font-size: 1.2rem; }
     nav ul { display: none; }
+    .nav-right {
+      display: flex; align-items: center;
+      gap: 0.5rem; margin-left: auto;
+    }
+    .nav-cta {
+      font-size: 0.78rem;
+      padding: 0.5rem 0.9rem;
+      white-space: nowrap;
+    }
+    .lang-btn {
+      padding: 0.4rem 0.65rem;
+      font-size: 0.75rem;
+      min-width: 36px;
+      min-height: 36px;
+    }
     .hero, .pipeline-section, .features-section, .audience-section, .beta-section { padding: 4rem 1.5rem; }
     .hero { padding-top: 7rem; }
     .pipeline-steps { grid-template-columns: 1fr 1fr; gap: 2rem; }
