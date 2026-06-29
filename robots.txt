@@ -1,0 +1,8 @@
+# ORBIT Analytics — robots.txt
+# https://orbitanalytics.org
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://orbitanalytics.org/sitemap.xml

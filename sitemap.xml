@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <!-- Main page — English (default) -->
+  <url>
+    <loc>https://orbitanalytics.org/</loc>
+    <lastmod>2026-06-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://orbitanalytics.org/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://orbitanalytics.org/?lang=fr"/>
+  </url>
+
+  <!-- Main page — French -->
+  <url>
+    <loc>https://orbitanalytics.org/?lang=fr</loc>
+    <lastmod>2026-06-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://orbitanalytics.org/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://orbitanalytics.org/?lang=fr"/>
+  </url>
+
+</urlset>
