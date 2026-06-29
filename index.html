@@ -84,7 +84,9 @@
     z-index: 3; animation: floatBadge 3s ease-in-out infinite;
   }
   @keyframes floatBadge { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
-  @media (max-width: 900px) { .coming-soon-badge { display: none; } }
+  @media (max-width: 900px) {
+    .hero-court { display: none; }
+    .coming-soon-badge { display: none; }
   .hero-content { position: relative; z-index: 2; max-width: 680px; }
   .hero-eyebrow {
     display: inline-flex; align-items: center; gap: 0.6rem;
